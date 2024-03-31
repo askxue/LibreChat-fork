@@ -1,24 +1,41 @@
 name: Sync Fork
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # 允许手动触发
   schedule:
-    - cron: '*/30 * * * *' # 每30分钟检查一次更新
+    - cron: '*/30 * * * *' # 每30分钟自动触发同步
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout the repository
         uses: actions/checkout@v4
         with:
-          ref: main       # 假设主分支为main
-          fetch-depth: 0  # 获取所有历史
+          ref: main
+          fetch-depth: 0 # 获取完整历史以便于合并
 
-      - name: Sync fork
-        uses: repo-sync/github-sync@v2
-        with:
-          source_repo: "danny-avila/LibreChat"
-          source_branch: "main"
-          destination_branch: "main"
-          github_token: ${{ secrets.MY_PERSONAL_TOKEN }}
+      - name: Save the local .github directory
+        run: tar -czf github_dir_backup.tar.gz .github
+
+      - name: Sync with upstream
+        run: |
+          git remote add upstream https://github.com/danny-avila/LibreChat.git
+          git fetch upstream main
+          git checkout main
+          git merge upstream/main --no-edit
+
+      - name: Restore the local .github directory
+        run: |
+          rm -rf .github
+          tar -xzf github_dir_backup.tar.gz
+
+      - name: Commit changes
+        run: |
+          git config user.name 'ask'
+          git config user.email 'xue65535@gmail.com'
+          git add .github
+          git commit -m "Restore .github directory" || echo "No changes to commit"
+
+      - name: Push changes to main
+        run: git push origin main
