@@ -1,8 +1,9 @@
 name: Sync Fork
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '*/30 * * * *' # 每30分鐘檢查一次更新
+    - cron: '*/30 * * * *' # 每30分钟检查一次更新
 
 jobs:
   sync:
@@ -11,8 +12,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: main       # 假設主分支為main
-          fetch-depth: 0  # 獲取所有歷史
+          ref: main       # 假设主分支为main
+          fetch-depth: 0  # 获取所有历史
 
       - name: Sync fork
         uses: repo-sync/github-sync@v2
