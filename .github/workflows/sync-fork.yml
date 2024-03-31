@@ -1,0 +1,23 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # 每30分鐘檢查一次更新
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: main       # 假設主分支為main
+          fetch-depth: 0  # 獲取所有歷史
+
+      - name: Sync fork
+        uses: repo-sync/github-sync@v2
+        with:
+          source_repo: "danny-avila/LibreChat"
+          source_branch: "main"
+          destination_branch: "main"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
