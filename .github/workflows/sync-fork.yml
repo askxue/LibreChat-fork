@@ -3,17 +3,25 @@ name: Sync Fork
 on:
   workflow_dispatch: # 允许手动触发
   schedule:
-    - cron: '*/30 * * * *' # 每30分钟自动触发同步
+    - cron: '0 */8 * * *' # 每8小时运行一次
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env: # 在这里定义环境变量
+      GIT_USER_NAME: ask
+      GIT_USER_EMAIL: xue65535@gmail.com
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0 # 获取完整历史以便于合并
+
+      - name: Configure git
+        run: |
+          git config user.name ${{env.GIT_USER_NAME}}
+          git config user.email ${{env.GIT_USER_EMAIL}}
 
       - name: Save the local .github directory
         run: tar -czf github_dir_backup.tar.gz .github
@@ -32,8 +40,8 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config user.name 'ask'
-          git config user.email 'xue65535@gmail.com'
+          git config user.name ${{env.GIT_USER_NAME}}
+          git config user.email ${{env.GIT_USER_EMAIL}}
           git add .github
           git commit -m "Restore .github directory" || echo "No changes to commit"
 
